@@ -19,31 +19,25 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class PhotoController {
-	
+
 	@RequestMapping(method = RequestMethod.GET, value = "/cameras/img")
 	public String provideUploadInfo(Model model) {
-		System.out.println("here");
 		File rootFolder = new File(MailBoxNotificationsApplication.ROOT);
 		@SuppressWarnings("unused")
-		List<String> fileNames = Arrays.stream(rootFolder.listFiles())
-			.map(f -> f.getName())
-			.collect(Collectors.toList());
+		List<String> fileNames = Arrays.stream(rootFolder.listFiles()).map(f -> f.getName())
+				.collect(Collectors.toList());
 
 		model.addAttribute("files",
-			Arrays.stream(rootFolder.listFiles())
-					.sorted(Comparator.comparingLong(f -> -1 * f.lastModified()))
-					.map(f -> f.getName())
-					.collect(Collectors.toList())
-		);
+				Arrays.stream(rootFolder.listFiles()).sorted(Comparator.comparingLong(f -> -1 * f.lastModified()))
+						.map(f -> f.getName()).collect(Collectors.toList()));
 
 		return "uploadForm";
 	}
-	
-	@RequestMapping(method = RequestMethod.POST, value = "/**")
-	public String handleFileUpload(@RequestParam("name") String name,
-								   @RequestParam("file") MultipartFile file,
-								   RedirectAttributes redirectAttributes) {
-		
+
+	@RequestMapping(method = RequestMethod.POST, value = "/cameras/img")
+	public String handleFileUpload(@RequestParam("name") String name, @RequestParam("file") MultipartFile file,
+			RedirectAttributes redirectAttributes) {
+
 		if (name.contains("/")) {
 			redirectAttributes.addFlashAttribute("message", "Folder separators not allowed");
 			return "redirect:/";
@@ -57,17 +51,14 @@ public class PhotoController {
 			try {
 				BufferedOutputStream stream = new BufferedOutputStream(
 						new FileOutputStream(new File(MailBoxNotificationsApplication.ROOT + "/" + name)));
-                FileCopyUtils.copy(file.getInputStream(), stream);
+				FileCopyUtils.copy(file.getInputStream(), stream);
 				stream.close();
-				redirectAttributes.addFlashAttribute("message",
-						"You successfully uploaded " + name + "!");
-			}
-			catch (Exception e) {
+				redirectAttributes.addFlashAttribute("message", "You successfully uploaded " + name + "!");
+			} catch (Exception e) {
 				redirectAttributes.addFlashAttribute("message",
 						"You failed to upload " + name + " => " + e.getMessage());
 			}
-		}
-		else {
+		} else {
 			redirectAttributes.addFlashAttribute("message",
 					"You failed to upload " + name + " because the file was empty");
 		}

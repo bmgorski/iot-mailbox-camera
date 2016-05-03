@@ -56,7 +56,7 @@ int sensorInput = 0;
 
 // TCP Setting
 TCPClient client;
-byte server[] = {192, 168, 1, 232};  // Add your Server IP
+byte server[] = {162, 243, 96, 91};  // Add your Server IP
 byte c;
 int port = 8080;
 int led  = D7;
@@ -286,7 +286,7 @@ int cameraFunc(String command) {
 
   uint16_t len = jpglen + extra_length;
 
-  header = header + "POST /cameras/img HTTP/1.1\r\n"
+  header = header + "POST /mail-box-notifications/cameras/img HTTP/1.1\r\n"
                   + "Host: 192.168.1.232:8080\r\n"
                   + "Connection: keep-alive\r\n"
                   + "Content-Length: " + len + "\r\n"
