@@ -50,9 +50,13 @@ uint8_t  serialNum;
 uint8_t  camerabuff[CAMERABUFFSIZ+1];
 uint8_t  bufferLen;
 uint16_t frameptr;
-int sensorPin = D0;
-int ledPin = D1;
+int sensorPin = A0;
 int sensorInput = 0;
+int startSensorPin = 0;
+
+String USER_ID = "2802d663269b4c9bae5bfefb0348427c";
+String DEVICE_ID = "360034000447353138383138";
+String series =  "";
 
 // TCP Setting
 TCPClient client;
@@ -215,11 +219,11 @@ uint8_t * camReadPicture(uint8_t n) {
 
 //----------- Setup the MicroController
 void setup() {
-
   pinMode(sensorPin, INPUT);
-  pinMode(ledPin, OUTPUT);
+  startSensorPin = analogRead(A0);
 
   Spark.function("camera", cameraFunc);
+  Spark.function("sensor", readSensor);
 //  Spark.function("blink", blinkFunc);
 //  Spark.variable("temperature", &sparkTempF, INT);
 
@@ -237,9 +241,26 @@ void setup() {
 
 }
 
+int readSensor(String command) {
+  if (command == "readFlex") {
+    return analogRead(A0);
+  }
+  //Something is reall wrong
+  return -999;
+}
+
+
 // call the below function when the POST request matches it
 int cameraFunc(String command) {
-  //Spark.publish("INFO","Got the request...");
+  if (command == "takePics") {
+    return snapPicture();
+  }
+  //Something is reall wrong
+  return -999;
+}
+
+uint8_t snapPicture(){
+  Spark.publish("INFO","Got the request to take photo...");
   // Set the picture size - you can choose one of 640x480, 320x240 or 160x120
   // Remember that bigger pictures take longer to transmit!
   //  camSetImageSize(VC0706_640x480);        // biggest
@@ -266,17 +287,23 @@ int cameraFunc(String command) {
 
   //--- TCP
 
-// Prepare request
+  // Prepare request
   String start_request = "";
   String end_request = "";
   String header = "";
-
   start_request = start_request + "------AaB03x\r\n"
-    +"Content-Disposition: form-data; name=\"name\"\r\n\r\n"
-    +"HOLYSHIT.JPG\r\n" + "------AaB03x\r\n"
-    +"Content-Disposition: form-data; name=\"file\"; filename=\"CAM.JPG\"\r\n"
-    +"Content-Type: image/jpg\r\n"
-    +"Content-Transfer-Encoding: binary\r\n\r\n";
+    + "Content-Disposition: form-data; name=\"status\"\r\n\r\n"
+    + sensorInput + "\r\n"
+    + "------AaB03x\r\n"
+    + "Content-Disposition: form-data; name=\"USER_ID\"\r\n\r\n"
+    + USER_ID + "\r\n"
+    + "------AaB03x\r\n"
+    + "Content-Disposition: form-data; name=\"DEVICE_ID\"\r\n\r\n"
+    + DEVICE_ID + "\r\n"
+    + "------AaB03x\r\n"
+    + "Content-Disposition: form-data; name=\"file\"; filename=\"CAM.JPG\"\r\n"
+    + "Content-Type: image/jpg\r\n"
+    + "Content-Transfer-Encoding: binary\r\n\r\n";
 
 
   end_request = end_request +"\r\n------AaB03x--";
@@ -287,7 +314,7 @@ int cameraFunc(String command) {
   uint16_t len = jpglen + extra_length;
 
   header = header + "POST /mail-box-notifications/cameras/img HTTP/1.1\r\n"
-                  + "Host: 192.168.1.232:8080\r\n"
+                  + "Host: 162.243.96.91:8080\r\n"
                   + "Connection: keep-alive\r\n"
                   + "Content-Length: " + len + "\r\n"
                   + "Cache-Control: max-age=0\r\n"
@@ -298,12 +325,9 @@ int cameraFunc(String command) {
                   + "Accept-Language: en-US,en;q=0.8\r\n\r\n";
 
   //Spark.publish("DEBUG","Starting connection to server...");
-
-  if (command == "takePics") {
-   //Spark.publish("DEBUG","Take Picture...");
-
-  if (client.connect(server, port))
-    {
+  //Spark.publish("DEBUG","Take Picture...");
+  if (client.connect(server, port)){
+      Spark.publish("DEBUG", "point 3");
     client.print(header);
     client.print(start_request);
     int32_t time = millis();
@@ -325,28 +349,26 @@ int cameraFunc(String command) {
     client.stop();
     camRsumeVideo();
     return 0;  // Picture success
-  }else {
+  }
+  else {
     return -1; // Failed
   }
-
-  }
-
 }
 
 bool takingPicture = false;
 
 void loop() {
 
-    sensorInput = digitalRead(sensorPin);
+    sensorInput = analogRead(sensorPin);
 
-     if (sensorInput == LOW) {         // check if the input is HIGH (button released)
-        digitalWrite(ledPin, LOW);  // turn LED OFF
-        takingPicture = false;
-     } else {
-        digitalWrite(ledPin, HIGH);// turn LED ON
-        if(takingPicture==false){
-           takingPicture=true;
-           cameraFunc("takePics");
-        }
+     if (abs(sensorInput - startSensorPin) > 50) {         // check if the input is HIGH (button released)
+       for(int i = 0; i < 5; i++){
+         sensorInput = analogRead(sensorPin);
+         snapPicture();
+         delay(200);
+       }
+
      }
+
+     delay(100);
 }

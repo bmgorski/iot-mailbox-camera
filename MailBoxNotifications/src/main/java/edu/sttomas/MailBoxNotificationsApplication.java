@@ -13,6 +13,9 @@ import org.springframework.web.filter.CommonsRequestLoggingFilter;
 @SpringBootApplication
 public class MailBoxNotificationsApplication extends SpringBootServletInitializer {
 
+	public static final String ACCESS_TOKEN = "9c827aa5905f71ac7b516ca2c45edd3925ddc02d";
+	public static final String DEVICE_ID = "360034000447353138383138";
+	
 	public static void main(String[] args) {
 		SpringApplication.run(MailBoxNotificationsApplication.class, args);
 	}

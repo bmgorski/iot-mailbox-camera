@@ -1,0 +1,27 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+	<div th:if="${message}">
+		<h2 th:text="${message}"/>
+	</div>
+
+	<div>
+		<form method="POST" enctype="multipart/form-data" action="">
+			<table>
+				<tr><td></td><td><input type="submit" value="Take Picture" /></td></tr>
+			</table>
+		</form>
+	</div>
+	
+	<div>
+		<ul>
+			<li th:each="image : ${images}">
+				<img th:src="@{/files/{id}/(id=${image.imageName})}" />
+				<p th:text="'Device was ' + ${image.deviceState}"></p>
+				<p th:text="'Time was ' + ${image.timestamp}"></p>
+			</li>
+		</ul>
+	</div>
+
+</body>
+</html>
