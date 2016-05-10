@@ -361,14 +361,24 @@ void loop() {
 
     sensorInput = analogRead(sensorPin);
 
-     if (abs(sensorInput - startSensorPin) > 50) {         // check if the input is HIGH (button released)
-       for(int i = 0; i < 5; i++){
+     if (abs(sensorInput - startSensorPin) > 10) {         // check if the input is HIGH (button released)
          sensorInput = analogRead(sensorPin);
          snapPicture();
          delay(200);
-       }
-
+         sensorInput = analogRead(sensorPin);
+         snapPicture();
+         delay(200);
+         sensorInput = analogRead(sensorPin);
+         snapPicture();
+         delay(200);
+         sensorInput = analogRead(sensorPin);
+         snapPicture();
+         delay(200);
+         sensorInput = analogRead(sensorPin);
+         snapPicture();
+         delay(200);
      }
 
+     startSensorPin = analogRead(sensorPin);
      delay(100);
 }

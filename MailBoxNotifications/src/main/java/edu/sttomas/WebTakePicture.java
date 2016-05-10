@@ -36,14 +36,14 @@ public class WebTakePicture {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/user/overview")
 	public String provideUploadInfo(Model model) {
-		model.addAttribute("images", mailBoxImageCRUD.findFirst20ByDeviceIdOrderByTimestampDesc(MailBoxNotificationsApplication.DEVICE_ID));		
+		model.addAttribute("images", mailBoxImageCRUD.findFirst20ByDeviceIdOrderByTimestampDesc(Application.DEVICE_ID));		
 		return "overView";
 	}
 
 	@RequestMapping(method = RequestMethod.POST, value = "/user/overview")
 	public String handleFileUpload(HttpServletRequest request) throws ClientProtocolException, IOException {
 
-		String url = "https://api.particle.io/v1/devices/" + MailBoxNotificationsApplication.DEVICE_ID + "/" + FUNCTION_NAME;
+		String url = "https://api.particle.io/v1/devices/" + Application.DEVICE_ID + "/" + FUNCTION_NAME;
 
 		HttpClient client = HttpClientBuilder.create().build();
 		HttpPost postCloud = new HttpPost(url);
@@ -52,7 +52,7 @@ public class WebTakePicture {
 		postCloud.addHeader("User-Agent", request.getHeader("User-Agent"));
 		
 		List<NameValuePair> urlParameters = new ArrayList<NameValuePair>();
-		urlParameters.add(new BasicNameValuePair("access_token", MailBoxNotificationsApplication.ACCESS_TOKEN));
+		urlParameters.add(new BasicNameValuePair("access_token", Application.ACCESS_TOKEN));
 		urlParameters.add(new BasicNameValuePair("arg", "takePics"));
 
 		postCloud.setEntity(new UrlEncodedFormEntity(urlParameters));

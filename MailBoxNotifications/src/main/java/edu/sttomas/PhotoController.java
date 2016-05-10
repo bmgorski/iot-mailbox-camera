@@ -36,7 +36,7 @@ public class PhotoController {
 	
 	@RequestMapping(method = RequestMethod.GET, value = "/cameras/img")
 	public String provideUploadInfo(Model model) {
-		File rootFolder = new File(MailBoxNotificationsApplication.ROOT);
+		File rootFolder = new File(Application.ROOT);
 		@SuppressWarnings("unused")
 		List<String> fileNames = Arrays.stream(rootFolder.listFiles()).map(f -> f.getName())
 				.collect(Collectors.toList());
@@ -58,7 +58,7 @@ public class PhotoController {
 		if (!file.isEmpty()) {
 			try {
 				BufferedOutputStream stream = new BufferedOutputStream(
-						new FileOutputStream(new File(MailBoxNotificationsApplication.ROOT + "/" + fileName)));
+						new FileOutputStream(new File(Application.ROOT + "/" + fileName)));
 				FileCopyUtils.copy(file.getInputStream(), stream);
 				stream.close();
 				redirectAttributes.addFlashAttribute("message", "You successfully uploaded " + fileName + "!");
@@ -83,7 +83,7 @@ public class PhotoController {
 	public void getFile(@PathVariable("file_name") String fileName, HttpServletResponse response) {
 		try {
 			// get your file as InputStream
-			InputStream inputStream = FileUtils.openInputStream(new File(MailBoxNotificationsApplication.ROOT + "/" + fileName));
+			InputStream inputStream = FileUtils.openInputStream(new File(Application.ROOT + "/" + fileName));
 			IOUtils.copy(inputStream,
 					response.getOutputStream());
 			inputStream.close();
